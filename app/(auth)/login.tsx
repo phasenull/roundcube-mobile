@@ -1,5 +1,6 @@
 import { useAuthStore } from "@/constants/auth-store"
 import { getLoginFields, mutateLogin } from "@/hooks/mail/auth-hooks"
+import { useRouter } from "expo-router"
 import React, { useState } from "react"
 import {
    ActivityIndicator,
@@ -23,6 +24,8 @@ export default function LoginPage() {
    const {mutate} = mutateLogin()
 	const  server  = useAuthStore((state) => state.server)
 	const { data: fields, isLoading, isError, error,refetch } = getLoginFields()
+	const router = useRouter()
+   console.log("LoginPage render, server:", server, "fields:", fields)
 	const handleLogin = async () => {
 		setIsLoggingIn(true)
 
@@ -60,6 +63,23 @@ export default function LoginPage() {
 						{error?.message || "Unable to connect to server"}
 					</Text>
 					<Text style={styles.serverText}>Server: {server}</Text>
+					
+					<View style={styles.errorButtonContainer}>
+						<TouchableOpacity 
+							style={styles.reloadButton}
+							onPress={() => refetch()}
+						>
+							<Text style={styles.reloadIcon}>🔄</Text>
+							<Text style={styles.reloadButtonText}>Retry Connection</Text>
+						</TouchableOpacity>
+						
+						<TouchableOpacity 
+							style={styles.changeServerButton}
+							onPress={() => router.push('/(auth)/set-server')}
+						>
+							<Text style={styles.changeServerButtonText}>Change Server</Text>
+						</TouchableOpacity>
+					</View>
 				</View>
 			</SafeAreaView>
 		)
@@ -87,7 +107,7 @@ export default function LoginPage() {
 						<View style={styles.logoContainer}>
 							{fields?.logoUrl ? (
 								<Image
-									src={fields.logoUrl.startsWith("http") ? fields.logoUrl.replace("http", "https") : `https://${server}${fields.logoUrl}`}
+									src={fields.logoUrl.startsWith("http") ? fields.logoUrl.replace("http", "https") : `https://${server}/${fields.logoUrl}`}
 									style={styles.logo}
                            className="bg-red-400 h-50"
 									resizeMode="contain"
@@ -102,8 +122,18 @@ export default function LoginPage() {
 
 						{/* Server Info */}
 						<View style={styles.serverContainer}>
-							<Text style={styles.serverLabel}>Connected to:</Text>
-							<Text style={styles.serverValue}>{server}</Text>
+							<View style={styles.serverInfo}>
+								<View>
+									<Text style={styles.serverLabel}>Connected to:</Text>
+									<Text style={styles.serverValue}>{server}</Text>
+								</View>
+								<TouchableOpacity 
+									style={styles.editButton}
+									onPress={() => router.push('/(auth)/set-server')}
+								>
+									<Text style={styles.editIcon}>✏️</Text>
+								</TouchableOpacity>
+							</View>
 						</View>
 
 						{/* Login Form */}
@@ -218,7 +248,42 @@ const styles = StyleSheet.create({
 	serverText: {
 		fontSize: 14,
 		color: "#999",
-		fontFamily: "monospace"
+		fontFamily: "monospace",
+		marginBottom: 24
+	},
+	errorButtonContainer: {
+		width: "100%",
+		gap: 12
+	},
+	reloadButton: {
+		backgroundColor: "#007AFF",
+		borderRadius: 8,
+		padding: 16,
+		alignItems: "center",
+		flexDirection: "row",
+		justifyContent: "center",
+		gap: 8
+	},
+	reloadIcon: {
+		fontSize: 18
+	},
+	reloadButtonText: {
+		color: "#fff",
+		fontSize: 16,
+		fontWeight: "600"
+	},
+	changeServerButton: {
+		backgroundColor: "transparent",
+		borderRadius: 8,
+		padding: 16,
+		alignItems: "center",
+		borderWidth: 1,
+		borderColor: "#007AFF"
+	},
+	changeServerButtonText: {
+		color: "#007AFF",
+		fontSize: 16,
+		fontWeight: "600"
 	},
 	logoContainer: {
 		alignItems: "center",
@@ -245,7 +310,11 @@ const styles = StyleSheet.create({
 		backgroundColor: "#e3f2fd",
 		padding: 12,
 		borderRadius: 8,
-		marginBottom: 30,
+		marginBottom: 30
+	},
+	serverInfo: {
+		flexDirection: "row",
+		justifyContent: "space-between",
 		alignItems: "center"
 	},
 	serverLabel: {
@@ -258,6 +327,14 @@ const styles = StyleSheet.create({
 		fontWeight: "600",
 		color: "#1976d2",
 		fontFamily: "monospace"
+	},
+	editButton: {
+		padding: 8,
+		borderRadius: 6,
+		backgroundColor: "rgba(25, 118, 210, 0.1)"
+	},
+	editIcon: {
+		fontSize: 16
 	},
 	formContainer: {
 		backgroundColor: "#fff",
