@@ -34,6 +34,10 @@ const MAPPING = {
   'flag': 'flag',
   'folder': 'folder',
   'magnifyingglass': 'search',
+  'xmark': 'close',
+  'xmark.circle.fill': 'cancel',
+  'checkmark.circle.fill': 'check-circle',
+  'person.3': 'group',
 } as IconMapping;
 
 /**
