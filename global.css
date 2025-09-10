@@ -1,11 +1,3 @@
-@import "tailwindcss";
-
-/* Custom CSS variables for your app colors */
-:root {
-  --color-primary: #0a7ea4;
-  --color-background: #fff;
-  --color-text: #11181C;
-  --color-icon: #687076;
-  --color-tab-icon-default: #687076;
-  --color-tab-icon-selected: #0a7ea4;
-}
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
