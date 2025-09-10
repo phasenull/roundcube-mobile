@@ -38,10 +38,10 @@
       [
         "expo-build-properties",
         {
-          "android": {
-          }
+          "android": {}
         }
-      ]
+      ],
+      "expo-background-task"
     ],
     "experiments": {
       "typedRoutes": true

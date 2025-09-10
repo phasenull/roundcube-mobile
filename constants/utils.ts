@@ -132,8 +132,8 @@ export function parseAllInputs(
  * @returns QuotaInfo object or null if not found
  */
 export function getUsage(html: string): QuotaInfo | null {
-	// Regex pattern to match rcmail.set_quota with its JSON argument
-	const quotaPattern = /rcmail\.set_quota\s*\(\s*({[^}]+})\s*\)/i
+	// Regex pattern to match both rcmail.set_quota and this.set_quota with their JSON argument
+	const quotaPattern = /(rcmail|this)\.set_quota\s*\(\s*({[^}]+})\s*\)/i
 	const match = html.match(quotaPattern)
 	
 	if (!match) {
@@ -141,8 +141,8 @@ export function getUsage(html: string): QuotaInfo | null {
 	}
 
 	try {
-		// Parse the JSON object from the matched string
-		const quotaJson = match[1]
+		// Parse the JSON object from the matched string (index 2 because of the capture group)
+		const quotaJson = match[2]
 		const quotaData = JSON.parse(quotaJson)
 		
 		// Validate that all expected properties exist
@@ -318,6 +318,55 @@ export function parseLogoUrl(url?: string): string | undefined {
 }
 
 /**
+ * Decodes HTML entities (both named and numeric) to their corresponding characters
+ * @param text - The text containing HTML entities
+ * @returns The decoded text
+ */
+export function decodeHtmlEntities(text: string): string {
+	// Common named HTML entities
+	const namedEntities: { [key: string]: string } = {
+		'&nbsp;': ' ',
+		'&lt;': '<',
+		'&gt;': '>',
+		'&amp;': '&',
+		'&quot;': '"',
+		'&apos;': "'",
+		'&cent;': '¢',
+		'&pound;': '£',
+		'&yen;': '¥',
+		'&euro;': '€',
+		'&copy;': '©',
+		'&reg;': '®',
+		'&trade;': '™',
+		'&hellip;': '…',
+		'&mdash;': '—',
+		'&ndash;': '–',
+		'&lsquo;': '\u2018',
+		'&rsquo;': '\u2019',
+		'&ldquo;': '\u201c',
+		'&rdquo;': '\u201d',
+	};
+
+	// Replace named entities
+	let decoded = text;
+	for (const [entity, char] of Object.entries(namedEntities)) {
+		decoded = decoded.replace(new RegExp(entity, 'gi'), char);
+	}
+
+	// Replace numeric entities (&#123; or &#x1F;)
+	decoded = decoded.replace(/&#(\d+);/g, (match, num) => {
+		return String.fromCharCode(parseInt(num, 10));
+	});
+
+	// Replace hexadecimal entities (&#x1F;)
+	decoded = decoded.replace(/&#x([0-9A-Fa-f]+);/g, (match, hex) => {
+		return String.fromCharCode(parseInt(hex, 16));
+	});
+
+	return decoded;
+}
+
+/**
  * Extracts the inner text content from a div element with id "messagebody"
  * @param html - The HTML string to parse
  * @returns The inner text content of the messagebody div or null if not found
@@ -339,15 +388,15 @@ export function parseMessageBody(html: string): string | null {
 		.replace(/<\/p>/gi, '\n\n')             // Convert </p> to double newlines
 		.replace(/<p[^>]*>/gi, '')              // Remove <p> opening tags
 		.replace(/<[^>]*>/g, '')                // Remove all other HTML tags
-		.replace(/&nbsp;/g, ' ')                // Convert &nbsp; to spaces
-		.replace(/&lt;/g, '<')                  // Convert &lt; to <
-		.replace(/&gt;/g, '>')                  // Convert &gt; to >
-		.replace(/&amp;/g, '&')                 // Convert &amp; to & (do this last)
 		.replace(/\s+\n/g, '\n')                // Remove trailing spaces before newlines
 		.replace(/\n\s+/g, '\n')                // Remove leading spaces after newlines
 		.replace(/\n{3,}/g, '\n\n')             // Limit consecutive newlines to 2
 		.trim();                                // Remove leading/trailing whitespace
+
+	// Decode HTML entities (including numeric ones like &#039;)
+	content = decodeHtmlEntities(content);
 	
+	console.log(content)
 	return content || null;
 }
 
@@ -382,3 +431,4 @@ export function parseFromToField(htmlString: string): string {
 	// Fallback: remove all HTML tags and return clean text
 	return htmlString.replace(/<[^>]*>/g, '').trim();
 }
+

@@ -1,5 +1,9 @@
 import { useAuthStore } from "@/constants/auth-store"
-import { makeRequest, parseMailboxData, parseMessageBody } from "@/constants/utils"
+import {
+	makeRequest,
+	parseMailboxData,
+	parseMessageBody
+} from "@/constants/utils"
 import { useQuery } from "@tanstack/react-query"
 
 export function useGetInbox() {
@@ -9,6 +13,7 @@ export function useGetInbox() {
 		queryKey: ["inbox", server],
 		queryFn: async () => {
 			if (!server) throw new Error("Server not set")
+			console.log("Fetching inbox for server:", server)
 			const inboxUrl = `https://${server}/?_task=mail&_action=list&_mbox=INBOX&_remote=1&_unlock=loading${Date.now()}&_=${Date.now()}`
 			const res = await makeRequest(inboxUrl, {
 				method: "GET",
@@ -25,10 +30,11 @@ export function useGetInbox() {
 				env: object
 				exec: string
 			}
+			const parsed = parseMailboxData(text.exec)
 			// console.log("Inbox response:", text.exec)
-			return parseMailboxData(text.exec)
+			return parsed
 		},
-		staleTime: 5 * 1000 // 5 seconds
+		staleTime: 0 * 1000 // 5 seconds
 	})
 }
 export function useGetMessagePreview(id: number) {
@@ -51,6 +57,6 @@ export function useGetMessagePreview(id: number) {
 
 			return content
 		},
-		staleTime: 1 * 60 * 1000
+		staleTime: 0 * 60 * 1000
 	})
 }

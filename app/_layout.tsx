@@ -65,7 +65,7 @@ export default function RootLayout() {
 	return (
 		<QueryClientProvider client={queryClient}>
 			<ThemeProvider value={DefaultTheme}>
-				<Stack initialRouteName="tabs" screenOptions={{ headerShown: false }}>
+				<Stack initialRouteName="(tabs)" screenOptions={{ headerShown: false }}>
 					<Stack.Screen
 						name="tabs"
 						options={{ headerShown: false }}

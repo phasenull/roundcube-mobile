@@ -7,12 +7,12 @@ import { useGetMessagePreview } from "@/hooks/core/email-hooks"
 import { Stack, useLocalSearchParams, useRouter } from "expo-router"
 import React from "react"
 import {
-  ActivityIndicator,
-  ScrollView,
-  StyleSheet,
-  Text,
-  TouchableOpacity,
-  View
+	ActivityIndicator,
+	ScrollView,
+	StyleSheet,
+	Text,
+	TouchableOpacity,
+	View
 } from "react-native"
 
 export default function EmailDetailScreen() {
@@ -56,10 +56,7 @@ export default function EmailDetailScreen() {
 			<>
 				<Stack.Screen options={{ headerShown: false }} />
 				<ThemedView style={styles.centered}>
-					<ActivityIndicator
-						size="large"
-						color={Colors.tint}
-					/>
+					<ActivityIndicator size="large" color={Colors.tint} />
 					<ThemedText style={styles.loadingText}>Loading email...</ThemedText>
 				</ThemedView>
 			</>
@@ -113,135 +110,104 @@ export default function EmailDetailScreen() {
 	}
 
 	return (
-		<>
+		<ThemedView style={styles.container}>
 			<Stack.Screen options={{ headerShown: false }} />
-			<ThemedView style={styles.container}>
-				<ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
-					<Text
-						style={[
-							styles.subject,
-							{ color: Colors.text,userSelect:"text" }
-						]}
-					>
-						{email.subject || "No Subject"}
-					</Text>
+			<ScrollView style={styles.content} contentContainerStyle={{paddingBottom:4*10}} showsVerticalScrollIndicator={false}>
+				<Text
+					style={[styles.subject, { color: Colors.text, userSelect: "text" }]}
+				>
+					{email.subject || "No Subject"}
+				</Text>
 
-					{/* Email Meta Info */}
-					<View style={[styles.metaContainer, { userSelect: "text" }]}>
-						<View style={styles.metaRow}>
-							<Text
-								style={[
-									styles.metaLabel,
-									{ color: Colors.tabIconDefault,userSelect:"text" }
-								]}
-							>
-								From:
-							</Text>
-							<Text
-								style={[
-									styles.metaValue,
-									{ color: Colors.text,userSelect:"text" }
-								]}
-							>
-								{email.fromto || "Unknown Sender"}
-							</Text>
-						</View>
-
-						<View style={styles.metaRow}>
-							<Text
-								style={[
-									styles.metaLabel,
-									{ color: Colors.tabIconDefault,userSelect:"text" }
-								]}
-							>
-								To:
-							</Text>
-							<Text
-								style={[
-									styles.metaValue,
-									{ color: Colors.text,userSelect:"text" }
-								]}
-							>
-								{user?.username || "You"}
-							</Text>
-						</View>
-
-						<View style={styles.metaRow}>
-							<Text
-								style={[
-									styles.metaLabel,
-									{ color: Colors.tabIconDefault }
-								]}
-							>
-								Date:
-							</Text>
-							<Text
-								style={[
-									styles.metaValue,
-									{ color: Colors.text }
-								]}
-							>
-								{formatDate(email.date)}
-							</Text>
-						</View>
-
-						{email.size && (
-							<View style={styles.metaRow}>
-								<Text
-									style={[
-										styles.metaLabel,
-										{ color: Colors.tabIconDefault }
-									]}
-								>
-									Size:
-								</Text>
-								<Text
-									style={[
-										styles.metaValue,
-										{ color: Colors.text }
-									]}
-								>
-									{email.size}
-								</Text>
-							</View>
-						)}
+				{/* Email Meta Info */}
+				<View style={[styles.metaContainer, { userSelect: "text" }]}>
+					<View style={styles.metaRow}>
+						<Text
+							style={[
+								styles.metaLabel,
+								{ color: Colors.tabIconDefault, userSelect: "text" }
+							]}
+						>
+							From:
+						</Text>
+						<Text
+							style={[
+								styles.metaValue,
+								{ color: Colors.text, userSelect: "text" }
+							]}
+						>
+							{email.fromto || "Unknown Sender"}
+						</Text>
 					</View>
 
-					{/* Divider */}
-					<View
-						style={[
-							styles.divider,
-							{ backgroundColor: Colors.tabIconDefault }
-						]}
-					/>
-
-					{/* Email Body */}
-					<View style={styles.bodyContainer}>
-						{messageBody ? (
-							<Text
-								style={[
-									styles.body,
-									{ userSelect: "text" }
-								]}
-							>
-								{messageBody}
-							</Text>
-						) : (
-							<View style={styles.noContentContainer}>
-								<IconSymbol
-									name="doc.text"
-									size={40}
-									color={Colors.tabIconDefault}
-								/>
-								<ThemedText style={styles.noContentText}>
-									No content available
-								</ThemedText>
-							</View>
-						)}
+					<View style={styles.metaRow}>
+						<Text
+							style={[
+								styles.metaLabel,
+								{ color: Colors.tabIconDefault, userSelect: "text" }
+							]}
+						>
+							To:
+						</Text>
+						<Text
+							style={[
+								styles.metaValue,
+								{ color: Colors.text, userSelect: "text" }
+							]}
+						>
+							{user?.username || "You"}
+						</Text>
 					</View>
-				</ScrollView>
-			</ThemedView>
-		</>
+
+					<View style={styles.metaRow}>
+						<Text style={[styles.metaLabel, { color: Colors.tabIconDefault }]}>
+							Date:
+						</Text>
+						<Text style={[styles.metaValue, { color: Colors.text }]}>
+							{formatDate(email.date)}
+						</Text>
+					</View>
+
+					{email.size && (
+						<View style={styles.metaRow}>
+							<Text
+								style={[styles.metaLabel, { color: Colors.tabIconDefault }]}
+							>
+								Size:
+							</Text>
+							<Text style={[styles.metaValue, { color: Colors.text }]}>
+								{email.size}
+							</Text>
+						</View>
+					)}
+				</View>
+
+				{/* Divider */}
+				<View
+					style={[styles.divider, { backgroundColor: Colors.tabIconDefault }]}
+				/>
+
+				{/* Email Body */}
+				<View style={styles.bodyContainer}>
+					{messageBody ? (
+						<Text style={[styles.body, { userSelect: "text" }]}>
+							{messageBody}
+						</Text>
+					) : (
+						<View style={styles.noContentContainer}>
+							<IconSymbol
+								name="doc.text"
+								size={40}
+								color={Colors.tabIconDefault}
+							/>
+							<ThemedText style={styles.noContentText}>
+								No content available
+							</ThemedText>
+						</View>
+					)}
+				</View>
+			</ScrollView>
+		</ThemedView>
 	)
 }
 

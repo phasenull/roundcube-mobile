@@ -48,7 +48,7 @@ export function mutateLogin() {
 			setUser({username: payload.email})
 			if (is_login_successful && quota) {
 				console.log("Login successful, received quota:", quota)
-				router.replace("/tabs")
+				router.replace("/")
 				return cookie
 			} else {
 				console.log("Login failed, response text:", res.status)

@@ -28,7 +28,7 @@ export default function HomeScreen() {
 			}
 			// backgroundColor="#1D3D47"
 
-			headerBackgroundColor={{ light: "#A1CEDC", dark: "#1D3D47" }}
+			// headerBackgroundColor={{ light: "#A1CEDC", dark: "#1D3D47" }}
 			headerImage={
 				<Image
 					source={
@@ -56,12 +56,13 @@ export default function HomeScreen() {
 					</View>
 				</View>
 				<ThemedText type="subtitle">logged in as</ThemedText>
-				<ThemedText>
-					{user?.username}
-					
+				<ThemedText>{user?.username}</ThemedText>
+				<ThemedText type="default">
+					{data?.quota?.title}
+					{/* {JSON.stringify(data)} of {data?.quota?.total} used */}
 				</ThemedText>
 			</ThemedView>
-			
+
 			{/* logout button */}
 			<TouchableHighlight
 				style={styles.logoutButton}
@@ -74,12 +75,14 @@ export default function HomeScreen() {
 				<ThemedText style={{ fontWeight: "600" }}>Logout</ThemedText>
 			</TouchableHighlight>
 			{/* debug info of inbox data */}
-			{(__DEV__ && false) && <ThemedView style={{ marginTop: 20 }}>
-				<ThemedText type="subtitle">Inbox Data (for debugging)</ThemedText>
-				{isLoading && <ThemedText>Loading...</ThemedText>}
-				{isError && <ThemedText>Error: {error.message}</ThemedText>}
-				{data && <ThemedText>{JSON.stringify(data, null, 2)}</ThemedText>}
-			</ThemedView>}
+			{__DEV__ && (
+				<ThemedView style={{ marginTop: 20 }}>
+					<ThemedText type="subtitle">Inbox Data (for debugging)</ThemedText>
+					{isLoading && <ThemedText>Loading...</ThemedText>}
+					{isError && <ThemedText>Error: {error?.message}</ThemedText>}
+					{data && <ThemedText>{JSON.stringify(data, null, 2)}</ThemedText>}
+				</ThemedView>
+			)}
 		</ParallaxScrollView>
 	)
 }
