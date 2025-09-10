@@ -1,11 +1,12 @@
 import { useAuthStore } from "@/constants/auth-store"
-import { getUsage, makeRequest, parseAndGetInputs } from "@/constants/utils"
+import { getPageTitle, getUsage, makeRequest, parseAndGetInputs } from "@/constants/utils"
 
 import { useMutation, useQuery } from "@tanstack/react-query"
 import { useRouter } from "expo-router"
 export function mutateLogin() {
 	const server = useAuthStore((state) => state.server)
 	const setUser = useAuthStore((state) => state.setUser)
+	const setConfig = useAuthStore((state) => state.setConfig)
 	const router = useRouter()
 	return useMutation({
 		mutationKey: ["login", server],
@@ -42,10 +43,12 @@ export function mutateLogin() {
 			const text = await res.text()
 			const is_login_successful = text.includes('span class="header-title username">')
 			const quota = getUsage(text)
+			const title = getPageTitle(text)
+			setConfig({title, quota})
 			setUser({username: payload.email})
 			if (is_login_successful && quota) {
 				console.log("Login successful, received quota:", quota)
-				router.replace("/")
+				router.replace("/tabs")
 				return cookie
 			} else {
 				console.log("Login failed, response text:", res.status)

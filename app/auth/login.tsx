@@ -1,5 +1,5 @@
 import { useAuthStore } from "@/constants/auth-store"
-import { getLoginFields, mutateLogin } from "@/hooks/mail/auth-hooks"
+import { getLoginFields, mutateLogin } from "@/hooks/core/auth-hooks"
 import { useRouter } from "expo-router"
 import React, { useState } from "react"
 import {
@@ -74,7 +74,7 @@ export default function LoginPage() {
 						
 						<TouchableOpacity 
 							style={styles.changeServerButton}
-							onPress={() => router.push('/(auth)/set-server')}
+							onPress={() => router.push('/auth/set-server')}
 						>
 							<Text style={styles.changeServerButtonText}>Change Server</Text>
 						</TouchableOpacity>
@@ -128,7 +128,7 @@ export default function LoginPage() {
 								</View>
 								<TouchableOpacity 
 									style={styles.editButton}
-									onPress={() => router.push('/(auth)/set-server')}
+									onPress={() => router.push('/auth/set-server')}
 								>
 									<Text style={styles.editIcon}>✏️</Text>
 								</TouchableOpacity>

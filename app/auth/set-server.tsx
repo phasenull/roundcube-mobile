@@ -2,12 +2,12 @@ import { useAuthStore } from "@/constants/auth-store"
 import { useRouter } from "expo-router"
 import React, { useCallback, useState } from "react"
 import {
-   Alert,
-   StyleSheet,
-   Text,
-   TextInput,
-   TouchableOpacity,
-   View
+	Alert,
+	StyleSheet,
+	Text,
+	TextInput,
+	TouchableOpacity,
+	View
 } from "react-native"
 import { SafeAreaView } from "react-native-safe-area-context"
 
@@ -35,7 +35,7 @@ export default function SetServerScreen() {
 		try {
 			new URL(formattedUrl) // Validate URL format
 			setServer(formattedUrl)
-			router.navigate("/login")
+			router.navigate("/auth/login")
 		} catch {
 			Alert.alert("Error", "Please enter a valid URL")
 		}

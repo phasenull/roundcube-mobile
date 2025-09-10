@@ -11,19 +11,27 @@ interface ILoginPayload {
 }
 
 interface AuthState {
-	cookie: string | null
 	user: {
-		username:string
+		username: string
 	} | null
-	setUser: (user:{username:string}|null) => void
+	setUser: (user: { username: string } | null) => void
 	login_payload: ILoginPayload | null
 	server: string | null
 	config: {
-		logo_url: string | null
-
-	} | null,
-	setConfig: (config: {logo_url: string | null}|null) => void
-	setAuth: (cookie: string|null) => void
+		logo_url?: string
+		quota?: {
+			used: number
+			total: number
+			percent: number
+			free: number
+			type: string
+			folder: string
+			title: string
+		}
+		title?: string
+		[key: string]: any
+	} | null
+	setConfig: (config: { [key: string]: any } | null) => void
 	setLoginPayload: (payload: ILoginPayload) => void
 	setServer: (url: string) => void
 	clearAuth: () => void
@@ -31,14 +39,15 @@ interface AuthState {
 
 export const useAuthStore = create<AuthState>()(
 	persist(
-		(set) => ({
-			cookie: null,
-			user:null,
+		(set, get) => ({
+			user: null,
 			login_payload: null,
 			server: null,
 			config: null,
-			setConfig: (config) => set({config}),
-			setAuth: (cookie) => set({ cookie }),
+			setConfig: (config) => {
+				const old = get().config
+				set({config: {...old, ...config}})
+			},
 			setLoginPayload: (payload: ILoginPayload) =>
 				set({ login_payload: payload }),
 			setServer: (url: string) => {
@@ -51,8 +60,8 @@ export const useAuthStore = create<AuthState>()(
 					set({ server: null })
 				}
 			},
-			setUser: (user) => set({user}),
-			clearAuth: () => set({ cookie: null, login_payload: null, server: null }),
+			setUser: (user) => set({ user }),
+			clearAuth: () => set({ login_payload: null, server: null })
 		}),
 
 		{

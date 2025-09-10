@@ -7,21 +7,20 @@ import { IconSymbol } from "@/components/ui/IconSymbol"
 import TabBarBackground from "@/components/ui/TabBarBackground"
 import { useAuthStore } from "@/constants/auth-store"
 import { Colors } from "@/constants/Colors"
-import { useColorScheme } from "@/hooks/useColorScheme"
 
 export default function TabLayout() {
-	const colorScheme = useColorScheme()
-
 	const server = useAuthStore((state) => state.server)
 	const user = useAuthStore((state) => state.user)
+	const config = useAuthStore((state) => state.config)
 	console.log("Server from store:", server)
 	console.log("Cookie from store:", user)
-	if (!server) return <Redirect href={"/set-server"} />
-	if (!user) return <Redirect href={"/login"} />
+	if (!server) return <Redirect href={"/auth/set-server"} />
+	if (!user) return <Redirect href={"/auth/login"} />
 	return (
 		<Tabs
+			
 			screenOptions={{
-				tabBarActiveTintColor: Colors[colorScheme ?? "light"].tint,
+				tabBarActiveTintColor: Colors.tint,
 				headerShown: true,
 				tabBarButton: HapticTab,
 				tabBarBackground: TabBarBackground,
@@ -38,6 +37,7 @@ export default function TabLayout() {
 				name="index"
 				options={{
 					title: "Home",
+					headerTitle: config?.title || "Home",
 					tabBarIcon: ({ color }) => (
 						<IconSymbol size={28} name="house.fill" color={color} />
 					)
