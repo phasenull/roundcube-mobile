@@ -27,8 +27,8 @@ export default function DevTools() {
 				<PersonPicker
 					initial_selected={selectedPeople}
 					allow_multiple={true}
+					onClose={() => setVisible(false)}
 					onSelect={(e) => {
-						setVisible(false)
 						setSelectedPeople(e as Person[])
 					}}
 				/>
