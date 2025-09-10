@@ -37,7 +37,7 @@ export function useGetMessagePreview(id: number) {
 		queryKey: ["preview", server, id],
 		queryFn: async () => {
 			if (!server) throw new Error("Server not set")
-			const previewUrl = `https://webmail.kocaeli.edu.tr/?_task=mail&_caps=pdf%3D1%2Cflash%3D0%2Ctiff%3D0%2Cwebp%3D1%2Cpgpmime%3D0&_uid=${id}&_mbox=INBOX&_framed=1&_action=preview`
+			const previewUrl = `https://${server}/?_task=mail&_caps=pdf%3D1%2Cflash%3D0%2Ctiff%3D0%2Cwebp%3D1%2Cpgpmime%3D0&_uid=${id}&_mbox=INBOX&_framed=1&_action=preview`
 			const res = await makeRequest(previewUrl, {
 				method: "GET",
 				headers: {
@@ -51,6 +51,6 @@ export function useGetMessagePreview(id: number) {
 
 			return content
 		},
-		staleTime: 0 * 60 * 1000 // 5 minutes
+		staleTime: 1 * 60 * 1000
 	})
 }
