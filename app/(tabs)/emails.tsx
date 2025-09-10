@@ -9,13 +9,13 @@ import { useColorScheme } from "@/hooks/useColorScheme"
 import { useRouter } from "expo-router"
 import React from "react"
 import {
-  Alert,
-  FlatList,
-  RefreshControl,
-  StyleSheet,
-  Text,
-  TouchableOpacity,
-  View
+	Alert,
+	FlatList,
+	RefreshControl,
+	StyleSheet,
+	Text,
+	TouchableOpacity,
+	View
 } from "react-native"
 
 export default function EmailsScreen() {
@@ -228,6 +228,19 @@ export default function EmailsScreen() {
 					{mailboxData.rowCount.text}
 				</ThemedText>
 			)}
+
+			{/* Floating Action Button */}
+			<TouchableOpacity
+				style={styles.fab}
+				onPress={() => router.push('/email/compose')}
+				activeOpacity={0.8}
+			>
+				<IconSymbol
+					name="plus"
+					size={24}
+					color="white"
+				/>
+			</TouchableOpacity>
 		</ThemedView>
 	)
 }
@@ -355,5 +368,24 @@ const styles = StyleSheet.create({
 	messageCountText: {
 		fontSize: 12,
 		opacity: 0.7
+	},
+	fab: {
+		position: 'absolute',
+		bottom: 20,
+		right: 20,
+		width: 56,
+		height: 56,
+		borderRadius: 28,
+		backgroundColor: Colors.tint,
+		justifyContent: 'center',
+		alignItems: 'center',
+		elevation: 8,
+		shadowColor: '#000',
+		shadowOffset: {
+			width: 0,
+			height: 4,
+		},
+		shadowOpacity: 0.3,
+		shadowRadius: 6,
 	}
 })

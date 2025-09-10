@@ -61,7 +61,7 @@ export const useAuthStore = create<AuthState>()(
 				}
 			},
 			setUser: (user) => set({ user }),
-			clearAuth: () => set({ login_payload: null, server: null })
+			clearAuth: () => set({ login_payload: null})
 		}),
 
 		{

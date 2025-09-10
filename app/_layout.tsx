@@ -11,6 +11,7 @@ import * as Updates from "expo-updates"
 import { useEffect } from "react"
 import { Button, Text, View } from "react-native"
 import "react-native-reanimated"
+import "../global.css"
 const queryClient = new QueryClient({
 	defaultOptions: { queries: { retry: 1 } }
 })
@@ -67,7 +68,7 @@ export default function RootLayout() {
 			<ThemeProvider value={DefaultTheme}>
 				<Stack initialRouteName="(tabs)" screenOptions={{ headerShown: false }}>
 					<Stack.Screen
-						name="tabs"
+						name="(tabs)"
 						options={{ headerShown: false }}
 					/>
 					<Stack.Screen

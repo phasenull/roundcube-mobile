@@ -1,5 +1,6 @@
 import { Image } from "expo-image"
 import {
+	Button,
 	RefreshControl,
 	StyleSheet,
 	Text,
@@ -76,7 +77,10 @@ export default function HomeScreen() {
 			</TouchableHighlight>
 			{/* debug info of inbox data */}
 			{__DEV__ && (
-				<ThemedView style={{ marginTop: 20 }}>
+				<ThemedView style={{ marginTop: 20,rowGap:40 }}>
+					<Button title="dev-tools" onPress={() => router.push("/dev-tools")}>
+
+					</Button>
 					<ThemedText type="subtitle">Inbox Data (for debugging)</ThemedText>
 					{isLoading && <ThemedText>Loading...</ThemedText>}
 					{isError && <ThemedText>Error: {error?.message}</ThemedText>}
