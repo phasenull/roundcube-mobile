@@ -3,20 +3,19 @@ import { getLoginFields, mutateLogin } from "@/hooks/mail/auth-hooks"
 import { useRouter } from "expo-router"
 import React, { useState } from "react"
 import {
-   ActivityIndicator,
-   Image,
-   KeyboardAvoidingView,
-   Platform,
-   RefreshControl,
-   ScrollView,
-   StyleSheet,
-   Text,
-   TextInput,
-   TouchableOpacity,
-   View
+	ActivityIndicator,
+	Image,
+	KeyboardAvoidingView,
+	Platform,
+	RefreshControl,
+	ScrollView,
+	StyleSheet,
+	Text,
+	TextInput,
+	TouchableOpacity,
+	View
 } from "react-native"
 import { SafeAreaView } from "react-native-safe-area-context"
-
 export default function LoginPage() {
 	const [email, setEmail] = useState("")
 	const [password, setPassword] = useState("")

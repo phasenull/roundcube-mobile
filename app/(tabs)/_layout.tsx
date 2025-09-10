@@ -13,16 +13,16 @@ export default function TabLayout() {
 	const colorScheme = useColorScheme()
 
 	const server = useAuthStore((state) => state.server)
-	const cookie = useAuthStore((state) => state.cookie)
-  console.log("Server from store:", server)
-  console.log("Cookie from store:", cookie)
+	const user = useAuthStore((state) => state.user)
+	console.log("Server from store:", server)
+	console.log("Cookie from store:", user)
 	if (!server) return <Redirect href={"/set-server"} />
-  if (!cookie) return <Redirect href={"/login"} />
+	if (!user) return <Redirect href={"/login"} />
 	return (
 		<Tabs
 			screenOptions={{
 				tabBarActiveTintColor: Colors[colorScheme ?? "light"].tint,
-				headerShown: false,
+				headerShown: true,
 				tabBarButton: HapticTab,
 				tabBarBackground: TabBarBackground,
 				tabBarStyle: Platform.select({
@@ -44,9 +44,9 @@ export default function TabLayout() {
 				}}
 			/>
 			<Tabs.Screen
-				name="explore"
+				name="emails"
 				options={{
-					title: "Explore",
+					title: "E-Mails",
 					tabBarIcon: ({ color }) => (
 						<IconSymbol size={28} name="paperplane.fill" color={color} />
 					)

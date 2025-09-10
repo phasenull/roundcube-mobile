@@ -85,16 +85,71 @@ export function parseAllInputs(
 	return result
 }
 
+/**
+ * Extracts quota information from rcmail.set_quota JavaScript call in HTML
+ * @param html - The HTML string containing the rcmail.set_quota call
+ * @returns QuotaInfo object or null if not found
+ */
+export function getUsage(html: string): QuotaInfo | null {
+	// Regex pattern to match rcmail.set_quota with its JSON argument
+	const quotaPattern = /rcmail\.set_quota\s*\(\s*({[^}]+})\s*\)/i
+	const match = html.match(quotaPattern)
+	
+	if (!match) {
+		return null
+	}
+
+	try {
+		// Parse the JSON object from the matched string
+		const quotaJson = match[1]
+		const quotaData = JSON.parse(quotaJson)
+		
+		// Validate that all expected properties exist
+		const requiredFields = ['used', 'total', 'percent', 'free', 'type', 'folder', 'title']
+		const hasAllFields = requiredFields.every(field => field in quotaData)
+		
+		if (!hasAllFields) {
+			console.warn('Missing required fields in quota data:', quotaData)
+			return null
+		}
+		
+		return {
+			used: quotaData.used,
+			total: quotaData.total,
+			percent: quotaData.percent,
+			free: quotaData.free,
+			type: quotaData.type,
+			folder: quotaData.folder,
+			title: quotaData.title
+		}
+	} catch (error) {
+		console.error('Failed to parse quota JSON:', error)
+		return null
+	}
+}
+
+import { FetchResponse } from "expo/build/winter/fetch/FetchResponse"
+import { fetch, FetchRequestInit } from "expo/fetch"
+
+export interface QuotaInfo {
+	used: number;
+	total: number;
+	percent: number;
+	free: number;
+	type: string;
+	folder: string;
+	title: string;
+}
 export async function makeRequest(
-	input: RequestInfo,
-	init?: RequestInit
-): Promise<Response> {
-	return await fetch(input, {
+	url: string,
+	init?: FetchRequestInit | undefined
+): Promise<FetchResponse> {
+	return await fetch(url, {
 		...init,
 		headers: {
 			...init?.headers,
 			"User-Agent":
-				"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36"
+				"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.3"
 		}
 	})
 }
