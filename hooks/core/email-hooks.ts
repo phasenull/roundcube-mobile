@@ -1,10 +1,11 @@
 import { useAuthStore } from "@/constants/auth-store"
 import {
+	getComposeFormFromHTML,
 	makeRequest,
 	parseMailboxData,
 	parseMessageBody
 } from "@/constants/utils"
-import { useQuery } from "@tanstack/react-query"
+import { useMutation, useQuery } from "@tanstack/react-query"
 
 export function useGetInbox() {
 	const server = useAuthStore((state) => state.server)
@@ -58,5 +59,42 @@ export function useGetMessagePreview(id: number) {
 			return content
 		},
 		staleTime: 0 * 60 * 1000
+	})
+}
+
+export async function createComposeSessionAsync(server: string) {
+	const composeUrl = `https://${server}/?_task=mail&_action=compose`
+	const res = await makeRequest(composeUrl, {
+		method: "GET",
+		headers: {},
+		credentials: "include"
+	})
+	const text = await res.text()
+	const data = getComposeFormFromHTML(text)
+	
+	// console.log("Compose session response:", text.slice(0,100))
+	return data
+}
+
+export function mutateCompose() {
+	const server = useAuthStore((state) => state.server)
+	return useMutation({
+		mutationKey: ["compose", server],
+		mutationFn: async (formData: FormData) => {
+			if (!server) throw new Error("Server not set")
+			const session = await createComposeSessionAsync(server)
+		}
+	})
+}
+
+export function useGetRequestToken() {
+	const server = useAuthStore((state) => state.server)
+	return useQuery({
+		queryKey: ["request-token", server],
+		queryFn: async () => {
+			if (!server) throw new Error("Server not set")
+			const session = await createComposeSessionAsync(server)
+			return session?.request_token
+		}
 	})
 }

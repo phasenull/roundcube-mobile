@@ -1,6 +1,161 @@
 import { FetchResponse } from "expo/build/winter/fetch/FetchResponse";
 import { fetch, FetchRequestInit } from "expo/fetch";
 
+export interface SearchResultItem {
+	name: string;
+	type: string;
+	id: string;
+	source: string;
+	display?: string;
+}
+
+export interface SearchResult {
+	results: SearchResultItem[];
+	query: string;
+	timestamp: string;
+}
+
+/**
+ * Parses search result from Roundcube ksearch_query_results JavaScript call
+ * @param text - The JavaScript text containing ksearch_query_results call
+ * @returns Parsed search result object or null if parsing fails
+ */
+export function parseSearchResult(text: string): SearchResult | null {
+	try {
+		// Extract the ksearch_query_results call with regex
+		const searchPattern = /this\.ksearch_query_results\s*\(\s*(\[.*?\])\s*,\s*["']([^"']+)["']\s*,\s*["']([^"']+)["']\s*\)/s;
+		const match = text.match(searchPattern);
+		
+		if (!match) {
+			console.warn('No ksearch_query_results call found in text');
+			return null;
+		}
+		
+		// Parse the JSON array of search results
+		const resultsJson = match[1];
+		const query = match[2];
+		const timestamp = match[3];
+		
+		const resultsArray = JSON.parse(resultsJson);
+		
+		// Validate that it's an array
+		if (!Array.isArray(resultsArray)) {
+			console.warn('Search results is not an array');
+			return null;
+		}
+		
+		// Map and validate each result item
+		const results: SearchResultItem[] = resultsArray.map((item: any) => {
+			if (!item || typeof item !== 'object') {
+				throw new Error('Invalid result item');
+			}
+			
+			
+			return {
+				name: item.name,
+				type: item.type,
+				id: item.id,
+				source: item.source,
+				display: item.display || undefined
+			};
+		}).filter((e)=>!!e);
+		
+		return {
+			results,
+			query,
+			timestamp
+		};
+		
+	} catch (error) {
+		console.error('Failed to parse search result:', error);
+		return null;
+	}
+}
+
+export interface ComposeFormData {
+	task: string;
+	locale: string;
+	action: string;
+	user_id: string;
+	compose_id: string;
+	session_id: string;
+	mailbox: string;
+	request_token: string;
+	max_filesize: number;
+	max_filecount: string;
+	attachments: any[];
+	signatures: Record<string, { text: string; html: string }>;
+	identities: Record<string, { bcc?: string; email: string }>;
+	drafts_mailbox: string;
+	draft_autosave: number;
+	default_font: string;
+	default_font_size: string;
+	top_posting: boolean;
+	sig_below: boolean;
+	show_sig: boolean;
+	[key: string]: any; // Allow additional properties
+}
+
+/**
+ * Extracts compose form configuration from HTML text containing rcmail.set_env call
+ * @param input - The HTML/text string containing the rcmail.set_env configuration
+ * @returns The parsed compose form data or null if not found
+ */
+export function getComposeFormFromHTML(input: string): ComposeFormData | null {
+	try {
+		// Pattern to match rcmail.set_env({...}) with the JSON configuration
+		const envPattern = /rcmail\.set_env\s*\(\s*({.*?})\s*\);?/s;
+		const match = input.match(envPattern);
+		
+		if (!match || !match[1]) {
+			console.warn('No rcmail.set_env call found in HTML');
+			return null;
+		}
+		
+		// Parse the JSON configuration
+		const configJson = match[1];
+		const config = JSON.parse(configJson);
+		
+		// Validate that essential compose fields exist
+		const requiredFields = ['task', 'action', 'request_token'];
+		const hasRequiredFields = requiredFields.every(field => field in config);
+		
+		if (!hasRequiredFields) {
+			console.warn('Missing required fields in compose configuration');
+			return null;
+		}
+		
+		// Return the parsed configuration with type safety
+		return {
+			task: config.task || '',
+			locale: config.locale || 'en_US',
+			action: config.action || '',
+			user_id: config.user_id || '',
+			compose_id: config.compose_id || '',
+			session_id: config.session_id || '',
+			mailbox: config.mailbox || 'INBOX',
+			request_token: config.request_token || '',
+			max_filesize: config.max_filesize || 0,
+			max_filecount: config.max_filecount || '0',
+			attachments: config.attachments || [],
+			signatures: config.signatures || {},
+			identities: config.identities || {},
+			drafts_mailbox: config.drafts_mailbox || 'Drafts',
+			draft_autosave: config.draft_autosave || 300,
+			default_font: config.default_font || 'Arial',
+			default_font_size: config.default_font_size || '12pt',
+			top_posting: config.top_posting || true,
+			sig_below: config.sig_below || false,
+			show_sig: config.show_sig || true,
+			...config // Include all other properties
+		};
+		
+	} catch (error) {
+		console.error('Failed to parse compose form from HTML:', error);
+		return null;
+	}
+}
+
 export interface QuotaInfo {
 	used: number;
 	total: number;
