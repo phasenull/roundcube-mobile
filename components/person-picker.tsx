@@ -2,9 +2,10 @@ import { IconSymbol } from "@/components/ui/IconSymbol"
 import { Colors } from "@/constants/Colors"
 import { useGetRequestToken } from "@/hooks/core/email-hooks"
 import { useSearchPeople } from "@/hooks/core/util-hooks"
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import {
    ActivityIndicator,
+   BackHandler,
    Modal,
    ScrollView,
    StyleSheet,
@@ -36,7 +37,6 @@ export default function PersonPicker<T extends boolean>(props: {
 	allow_multiple?: T
 	initial_selected?: Person[]
 	onSelect?: (person: T extends true ? Person[] : Person) => void
-	onClose?: () => void
 	visible?: boolean
 }) {
 	const [search, setSearch] = useState("")
@@ -45,6 +45,19 @@ export default function PersonPicker<T extends boolean>(props: {
 	const [selected, setSelected] = useState<Person[]>(
 		props.initial_selected || []
 	)
+
+	// Handle back button press
+	useEffect(() => {
+		const backHandler = BackHandler.addEventListener('hardwareBackPress', () => {
+			if (props.visible) {
+				handleDone()
+				return true // Prevent default behavior
+			}
+			return false // Allow default behavior
+		})
+
+		return () => backHandler.remove()
+	}, [props.visible, props.onSelect])
 
 	function addOrRemovePerson(person: Person) {
 		setSelected((current) => {
@@ -98,7 +111,6 @@ export default function PersonPicker<T extends boolean>(props: {
 				? (selected as RequestedPersonType)
 				: (selected[0] as RequestedPersonType)
 		)
-		props.onClose?.()
 	}
 
 	const removeSelectedPerson = (personId: string) => {
@@ -106,11 +118,16 @@ export default function PersonPicker<T extends boolean>(props: {
 	}
 
 	return (
-		<Modal visible={props.visible} animationType="slide" presentationStyle="pageSheet">
+		<Modal 
+			visible={props.visible} 
+			animationType="slide" 
+			presentationStyle="pageSheet"
+			onRequestClose={handleDone}
+		>
 			<View style={styles.container}>
 				{/* Header */}
 				<View style={styles.header}>
-					<TouchableOpacity onPress={props.onClose} style={styles.headerButton}>
+					<TouchableOpacity onPress={handleDone} style={styles.headerButton}>
 						<IconSymbol name="arrow.left" size={24} color={Colors.text} />
 					</TouchableOpacity>
 					<Text style={styles.headerTitle}>

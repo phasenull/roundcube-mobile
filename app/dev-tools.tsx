@@ -23,16 +23,15 @@ export default function DevTools() {
 						: "SELECT A PERSON"}
 				</Text>
 			</TouchableOpacity>
-			{visible && (
-				<PersonPicker
-					initial_selected={selectedPeople}
-					allow_multiple={true}
-					onClose={() => setVisible(false)}
-					onSelect={(e) => {
-						setSelectedPeople(e as Person[])
-					}}
-				/>
-			)}
+			<PersonPicker
+				visible={visible}
+				initial_selected={selectedPeople}
+				allow_multiple={true}
+				onSelect={(e) => {
+					setSelectedPeople(e as Person[])
+					setVisible(false)
+				}}
+			/>
 		</View>
 	)
 }
