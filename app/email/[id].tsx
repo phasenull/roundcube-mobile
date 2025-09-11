@@ -3,6 +3,7 @@ import { ThemedView } from "@/components/ThemedView"
 import { IconSymbol } from "@/components/ui/IconSymbol"
 import { useAuthStore } from "@/constants/auth-store"
 import { Colors } from "@/constants/Colors"
+import { MessageRow } from "@/constants/utils"
 import { useGetMessagePreview } from "@/hooks/core/email-hooks"
 import { Stack, useLocalSearchParams, useRouter } from "expo-router"
 import React from "react"
@@ -19,10 +20,10 @@ export default function EmailDetailScreen() {
 	const router = useRouter()
 	const { id, email_json,type } = useLocalSearchParams<{
 		id: string
-		type: "INBOX" | "Sent" | "Drafts"
+		type: "inbox" | "sent" | "drafts"
 		email_json: string
 	}>()
-	const email = JSON.parse(decodeURIComponent(email_json))
+	const email = JSON.parse(decodeURIComponent(email_json)) as MessageRow
 	const { user } = useAuthStore()
 
 	// Get message preview using the hook
@@ -117,7 +118,7 @@ export default function EmailDetailScreen() {
 				<Text
 					style={[styles.subject, { color: Colors.text, userSelect: "text" }]}
 				>
-					{email.subject || "No Subject"} {type}
+					{type} {">"} {email.subject || "No Subject"}
 				</Text>
 
 				{/* Email Meta Info */}
@@ -137,7 +138,7 @@ export default function EmailDetailScreen() {
 								{ color: Colors.text, userSelect: "text" }
 							]}
 						>
-							{email.fromto || "Unknown Sender"}
+							{type === "inbox" ? email.fromto || "Unknown Sender" : user?.username}
 						</Text>
 					</View>
 
@@ -156,7 +157,7 @@ export default function EmailDetailScreen() {
 								{ color: Colors.text, userSelect: "text" }
 							]}
 						>
-							{user?.username || "You"}
+							{type === "inbox" ? user?.username || "Unknown Sender" : email.fromto}
 						</Text>
 					</View>
 
@@ -165,7 +166,7 @@ export default function EmailDetailScreen() {
 							Date:
 						</Text>
 						<Text style={[styles.metaValue, { color: Colors.text }]}>
-							{formatDate(email.date)}
+							{email.date}
 						</Text>
 					</View>
 
