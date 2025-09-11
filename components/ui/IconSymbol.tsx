@@ -38,6 +38,22 @@ const MAPPING = {
   'xmark.circle.fill': 'cancel',
   'checkmark.circle.fill': 'check-circle',
   'person.3': 'group',
+  'eye': 'visibility',
+  'doc.text': 'description',
+  'photo': 'image',
+  'doc.plaintext': 'article',
+  'doc.richtext': 'text-snippet',
+  'tablecells': 'table-chart',
+  'play.rectangle': 'play-arrow',
+  'archivebox': 'archive',
+  'video': 'video-library',
+  'music.note': 'music-note',
+  'doc': 'insert-drive-file',
+  'arrow.down': 'file-download',
+  'arrow.down.circle': 'get-app',
+  'arrow.down.circle.fill': 'get-app',
+  'tray.and.arrow.down': 'download',
+  'square.and.arrow.down': 'download',
 } as IconMapping;
 
 /**
