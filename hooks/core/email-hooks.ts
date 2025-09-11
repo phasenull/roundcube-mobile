@@ -6,15 +6,18 @@ import {
 	parseMessageBody
 } from "@/constants/utils"
 import { useMutation, useQuery } from "@tanstack/react-query"
+import { router } from "expo-router"
 
 export function useGetInbox() {
 	const server = useAuthStore((state) => state.server)
 	const setConfig = useAuthStore((state) => state.setConfig)
+	const clearAuth = useAuthStore((state) => state.clearAuth)
 	return useQuery({
 		queryKey: ["inbox", server],
 		queryFn: async () => {
 			if (!server) throw new Error("Server not set")
 			console.log("Fetching inbox for server:", server)
+		
 			const inboxUrl = `https://${server}/?_task=mail&_action=list&_mbox=INBOX&_remote=1&_unlock=loading${Date.now()}&_=${Date.now()}`
 			const res = await makeRequest(inboxUrl, {
 				method: "GET",
@@ -30,6 +33,12 @@ export function useGetInbox() {
 				unlock: string
 				env: object
 				exec: string
+			}
+			console.log("Inbox fetch response status:", res.status)
+			if (text.exec.includes('this.display_message(\"Your session is invalid or expired.\"')) {
+				clearAuth()
+				router.navigate("/auth/login")
+				return
 			}
 			const parsed = parseMailboxData(text.exec)
 			// console.log("Inbox response:", text.exec)

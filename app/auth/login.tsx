@@ -24,7 +24,7 @@ export default function LoginPage() {
 	const  server  = useAuthStore((state) => state.server)
 	const { data: fields, isLoading, isError, error,refetch } = getLoginFields()
 	const router = useRouter()
-   console.log("LoginPage render, server:", server, "fields:", fields)
+   // console.log("LoginPage render, server:", server, "fields:", fields)
 	const handleLogin = async () => {
 		setIsLoggingIn(true)
 

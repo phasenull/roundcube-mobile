@@ -46,7 +46,7 @@ export const useAuthStore = create<AuthState>()(
 			config: null,
 			setConfig: (config) => {
 				const old = get().config
-				set({config: {...old, ...config}})
+				set({ config: { ...old, ...config } })
 			},
 			setLoginPayload: (payload: ILoginPayload) =>
 				set({ login_payload: payload }),
@@ -61,7 +61,10 @@ export const useAuthStore = create<AuthState>()(
 				}
 			},
 			setUser: (user) => set({ user }),
-			clearAuth: () => set({ login_payload: null})
+			clearAuth: () => {
+				console.log("!!! Clearing auth state")
+				set({ login_payload: null })
+			}
 		}),
 
 		{

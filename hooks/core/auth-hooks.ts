@@ -41,17 +41,17 @@ export function mutateLogin() {
 			// if (!cookies) throw new Error("No cookies set")
 			const cookie = cookies?.split(";")[0]
 			const text = await res.text()
-			const is_login_successful = text.includes('span class="header-title username">')
+			// const is_login_successful = text.includes('span class="header-title username">')
 			const quota = getUsage(text)
 			const title = getPageTitle(text)
 			setConfig({title, quota})
 			setUser({username: payload.email})
-			if (is_login_successful && quota) {
+			if (quota) {
 				console.log("Login successful, received quota:", quota)
 				router.replace("/")
 				return cookie
 			} else {
-				console.log("Login failed, response text:", res.status)
+				console.log("Login failed, response quota:",quota)
 				// console.log(text)
 				throw new Error("Login failed")
 			}
@@ -97,11 +97,11 @@ export function getLoginFields() {
 				},
 				credentials: "include"
 			})
+			console.log("Response status:", res.status)
 			if (!(res.status === 200)) {
 				throw new Error(`Network response was not ok ${res.status}`)
 			}
 			// console.log("headers", res.headers)
-			console.log("Response status:", res.status)
 
 			const text = await res.text()
 			const headers = res.headers.get("Set-Cookie")

@@ -12,8 +12,6 @@ export default function TabLayout() {
 	const server = useAuthStore((state) => state.server)
 	const user = useAuthStore((state) => state.user)
 	const config = useAuthStore((state) => state.config)
-	console.log("Server from store:", server)
-	console.log("Cookie from store:", user)
 	if (!server) return <Redirect href={"/auth/set-server"} />
 	if (!user) return <Redirect href={"/auth/login"} />
 	return (
