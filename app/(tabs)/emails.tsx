@@ -4,10 +4,10 @@ import { IconSymbol } from "@/components/ui/IconSymbol"
 import { useAuthStore } from "@/constants/auth-store"
 import { Colors } from "@/constants/Colors"
 import { MessageRow } from "@/constants/utils"
-import { useGetInbox } from "@/hooks/core/email-hooks"
+import { useGetDrafts, useGetInbox, useGetSent } from "@/hooks/core/email-hooks"
 import { useColorScheme } from "@/hooks/useColorScheme"
 import { useRouter } from "expo-router"
-import React from "react"
+import React, { useState } from "react"
 import {
 	Alert,
 	FlatList,
@@ -18,20 +18,61 @@ import {
 	View
 } from "react-native"
 
+type EmailSection = "inbox" | "sent" | "drafts"
+
 export default function EmailsScreen() {
 	const router = useRouter()
 	const colorScheme = useColorScheme()
 	const { user } = useAuthStore()
-	const {
-		data: mailboxData,
-		isLoading,
-		isError,
-		error,
-		refetch,
-		isRefetching
-	} = useGetInbox()
+	const [activeSection, setActiveSection] = useState<EmailSection>("inbox")
 
-	const emails = mailboxData?.messages || []
+	// Fetch data for all sections
+	const inboxQuery = useGetInbox()
+	const sentQuery = useGetSent()
+	const draftsQuery = useGetDrafts()
+
+	// Get current section data
+	const getCurrentQuery = () => {
+		switch (activeSection) {
+			case "inbox":
+				return inboxQuery
+			case "sent":
+				return sentQuery
+			case "drafts":
+				return draftsQuery
+			default:
+				return inboxQuery
+		}
+	}
+
+	const currentQuery = getCurrentQuery()
+	const emails = currentQuery.data?.messages || []
+
+	const getSectionIcon = (section: EmailSection) => {
+		switch (section) {
+			case "inbox":
+				return "tray"
+			case "sent":
+				return "paperplane"
+			case "drafts":
+				return "doc.text"
+			default:
+				return "tray"
+		}
+	}
+
+	const getSectionTitle = (section: EmailSection) => {
+		switch (section) {
+			case "inbox":
+				return "Inbox"
+			case "sent":
+				return "Sent"
+			case "drafts":
+				return "Drafts"
+			default:
+				return "Inbox"
+		}
+	}
 
 	const getMessageCountText = () => {
 		if (emails.length === 0) return ""
@@ -63,7 +104,7 @@ export default function EmailsScreen() {
 
 	const handleRefresh = async () => {
 		try {
-			await refetch()
+			await currentQuery.refetch()
 		} catch (error) {
 			console.error("Error refreshing emails:", error)
 			Alert.alert("Error", "Failed to refresh emails")
@@ -83,7 +124,14 @@ export default function EmailsScreen() {
 					}
 				]}
 				onPress={() =>
-					router.push({ pathname: `/email/[id]`, params: { id: item.id, email_json: JSON.stringify(item) } })
+					router.push({
+						pathname: `/email/[id]`,
+						params: {
+							id: item.id,
+							email_json: JSON.stringify(item),
+							type: activeSection
+						}
+					})
 				}
 			>
 				<Text
@@ -115,30 +163,17 @@ export default function EmailsScreen() {
 						</Text>
 						{isUnread && (
 							<View
-								style={[
-									styles.unreadDot,
-									{ backgroundColor: Colors.tint }
-								]}
+								style={[styles.unreadDot, { backgroundColor: Colors.tint }]}
 							/>
 						)}
 					</View>
-					<Text
-						style={[
-							styles.date,
-							{ color: Colors.tabIconDefault }
-						]}
-					>
+					<Text style={[styles.date, { color: Colors.tabIconDefault }]}>
 						{item.date}
 					</Text>
 				</View>
 
 				<View style={styles.emailMeta}>
-					<Text
-						style={[
-							styles.size,
-							{ color: Colors.tabIconDefault }
-						]}
-					>
+					<Text style={[styles.size, { color: Colors.tabIconDefault }]}>
 						{item.size}
 					</Text>
 					{item.ctype && (
@@ -156,11 +191,7 @@ export default function EmailsScreen() {
 	if (!user) {
 		return (
 			<ThemedView style={styles.centered}>
-				<IconSymbol
-					name="envelope"
-					size={60}
-					color={Colors.tabIconDefault}
-				/>
+				<IconSymbol name="envelope" size={60} color={Colors.tabIconDefault} />
 				<ThemedText style={styles.emptyText}>
 					Please login to view emails
 				</ThemedText>
@@ -168,7 +199,7 @@ export default function EmailsScreen() {
 		)
 	}
 
-	if (isError) {
+	if (currentQuery.isError) {
 		return (
 			<ThemedView style={styles.centered}>
 				<IconSymbol
@@ -177,7 +208,7 @@ export default function EmailsScreen() {
 					color={Colors.tabIconDefault}
 				/>
 				<ThemedText style={styles.emptyText}>
-					{error?.message || "Failed to load emails"}
+					{currentQuery.error?.message || "Failed to load emails"}
 				</ThemedText>
 				<TouchableOpacity style={styles.retryButton} onPress={handleRefresh}>
 					<ThemedText style={styles.retryText}>Retry</ThemedText>
@@ -188,15 +219,68 @@ export default function EmailsScreen() {
 
 	return (
 		<ThemedView style={styles.container}>
+			{/* Section Tabs */}
+			<View style={styles.sectionTabs}>
+				{(["inbox", "sent", "drafts"] as EmailSection[]).map((section) => (
+					<TouchableOpacity
+						key={section}
+						style={[
+							styles.sectionTab,
+							activeSection === section && styles.activeSectionTab
+						]}
+						onPress={() => setActiveSection(section)}
+					>
+						<IconSymbol
+							name={getSectionIcon(section)}
+							size={20}
+							color={
+								activeSection === section ? Colors.tint : Colors.tabIconDefault
+							}
+						/>
+						<Text
+							style={[
+								styles.sectionTabText,
+								{
+									color:
+										activeSection === section
+											? Colors.tint
+											: Colors.tabIconDefault,
+									fontWeight: activeSection === section ? "600" : "normal"
+								}
+							]}
+						>
+							{getSectionTitle(section)}
+						</Text>
+						{/* Badge for email count */}
+						{currentQuery.data?.messages &&
+							currentQuery.data.messages.length > 0 &&
+							activeSection === section && (
+								<View
+									style={[
+										styles.sectionBadge,
+										{ backgroundColor: Colors.tint }
+									]}
+								>
+									<Text style={styles.sectionBadgeText}>
+										{currentQuery.data.messages.length}
+									</Text>
+								</View>
+							)}
+					</TouchableOpacity>
+				))}
+			</View>
+
 			<View style={[styles.emailListContainer, { flex: 1, display: "flex" }]}>
-				{emails.length === 0 && !isLoading ? (
+				{emails.length === 0 && !currentQuery.isLoading ? (
 					<View style={styles.centered}>
 						<IconSymbol
 							name="envelope"
 							size={60}
 							color={Colors.tabIconDefault}
 						/>
-						<ThemedText style={styles.emptyText}>No emails found</ThemedText>
+						<ThemedText style={styles.emptyText}>
+							No {getSectionTitle(activeSection).toLowerCase()} found
+						</ThemedText>
 						<TouchableOpacity
 							style={styles.retryButton}
 							onPress={handleRefresh}
@@ -213,7 +297,7 @@ export default function EmailsScreen() {
 						keyExtractor={(item) => item.id.toString()}
 						refreshControl={
 							<RefreshControl
-								refreshing={isRefetching}
+								refreshing={currentQuery.isRefetching}
 								onRefresh={handleRefresh}
 								tintColor={Colors.tint}
 							/>
@@ -223,23 +307,19 @@ export default function EmailsScreen() {
 				)}
 			</View>
 
-			{mailboxData?.rowCount && (
+			{currentQuery.data?.rowCount && (
 				<ThemedText style={styles.rowCountText}>
-					{mailboxData.rowCount.text}
+					{currentQuery.data.rowCount.text}
 				</ThemedText>
 			)}
 
 			{/* Floating Action Button */}
 			<TouchableOpacity
 				style={styles.fab}
-				onPress={() => router.push('/email/compose')}
+				onPress={() => router.push("/email/compose")}
 				activeOpacity={0.8}
 			>
-				<IconSymbol
-					name="plus"
-					size={24}
-					color="white"
-				/>
+				<IconSymbol name="plus" size={24} color="white" />
 			</TouchableOpacity>
 		</ThemedView>
 	)
@@ -248,6 +328,46 @@ export default function EmailsScreen() {
 const styles = StyleSheet.create({
 	container: {
 		flex: 1
+	},
+	sectionTabs: {
+		flexDirection: "row",
+		backgroundColor: "white",
+		paddingHorizontal: 4,
+		paddingVertical: 8,
+		borderBottomWidth: StyleSheet.hairlineWidth,
+		borderBottomColor: Colors.tabIconDefault + "20"
+	},
+	sectionTab: {
+		flex: 1,
+		flexDirection: "row",
+		alignItems: "center",
+		justifyContent: "center",
+		paddingVertical: 12,
+		paddingHorizontal: 16,
+		borderRadius: 8,
+		marginHorizontal: 4,
+		backgroundColor: "transparent"
+	},
+	activeSectionTab: {
+		backgroundColor: Colors.tint + "10"
+	},
+	sectionTabText: {
+		fontSize: 14,
+		marginLeft: 6
+	},
+	sectionBadge: {
+		marginLeft: 6,
+		paddingHorizontal: 6,
+		paddingVertical: 2,
+		borderRadius: 10,
+		minWidth: 20,
+		alignItems: "center",
+		justifyContent: "center"
+	},
+	sectionBadgeText: {
+		color: "white",
+		fontSize: 11,
+		fontWeight: "bold"
 	},
 	header: {
 		flexDirection: "row",
@@ -370,22 +490,22 @@ const styles = StyleSheet.create({
 		opacity: 0.7
 	},
 	fab: {
-		position: 'absolute',
+		position: "absolute",
 		bottom: 20,
 		right: 20,
 		width: 56,
 		height: 56,
 		borderRadius: 28,
 		backgroundColor: Colors.tint,
-		justifyContent: 'center',
-		alignItems: 'center',
+		justifyContent: "center",
+		alignItems: "center",
 		elevation: 8,
-		shadowColor: '#000',
+		shadowColor: "#000",
 		shadowOffset: {
 			width: 0,
-			height: 4,
+			height: 4
 		},
 		shadowOpacity: 0.3,
-		shadowRadius: 6,
+		shadowRadius: 6
 	}
 })

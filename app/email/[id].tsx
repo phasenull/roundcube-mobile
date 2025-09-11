@@ -17,8 +17,9 @@ import {
 
 export default function EmailDetailScreen() {
 	const router = useRouter()
-	const { id, email_json } = useLocalSearchParams<{
+	const { id, email_json,type } = useLocalSearchParams<{
 		id: string
+		type: "INBOX" | "Sent" | "Drafts"
 		email_json: string
 	}>()
 	const email = JSON.parse(decodeURIComponent(email_json))
@@ -30,7 +31,7 @@ export default function EmailDetailScreen() {
 		isLoading,
 		isError,
 		error
-	} = useGetMessagePreview(id ? parseInt(id) : 0)
+	} = useGetMessagePreview(id ? parseInt(id) : 0,type)
 
 	// Get inbox data to find email details
 
@@ -116,7 +117,7 @@ export default function EmailDetailScreen() {
 				<Text
 					style={[styles.subject, { color: Colors.text, userSelect: "text" }]}
 				>
-					{email.subject || "No Subject"}
+					{email.subject || "No Subject"} {type}
 				</Text>
 
 				{/* Email Meta Info */}
