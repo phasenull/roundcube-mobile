@@ -555,6 +555,77 @@ export function parseMessageBody(html: string): string | null {
 	return content || null;
 }
 
+export interface AttachmentInfo {
+	id: string;
+	name: string;
+	size: string;
+	type: string;
+	url: string;
+	className: string;
+}
+
+/**
+ * Extracts attachment information from HTML element with id "attachment-list"
+ * @param html - The HTML string to parse
+ * @returns Array of attachment objects or empty array if not found
+ */
+export function parseAttachments(html: string): AttachmentInfo[] {
+	// Regex pattern to match ul with id="attachment-list" and capture its content
+	const attachmentListPattern = /<ul[^>]*id\s*=\s*["']attachment-list["'][^>]*>([\s\S]*?)<\/ul>/i;
+	const match = html.match(attachmentListPattern);
+	
+	if (!match || !match[1]) {
+		return [];
+	}
+	
+	const listContent = match[1];
+	const attachments: AttachmentInfo[] = [];
+	
+	// Regex pattern to match each li element with attachment info
+	const liPattern = /<li[^>]*class\s*=\s*["']([^"']+)["'][^>]*id\s*=\s*["']([^"']+)["'][^>]*>([\s\S]*?)<\/li>/gi;
+	let liMatch;
+	
+	while ((liMatch = liPattern.exec(listContent)) !== null) {
+		const className = liMatch[1];
+		const id = liMatch[2];
+		const liContent = liMatch[3];
+		
+		// Extract href from anchor tag
+		const hrefPattern = /<a[^>]*href\s*=\s*["']([^"']+)["'][^>]*>/i;
+		const hrefMatch = liContent.match(hrefPattern);
+		const url = hrefMatch ? decodeHtmlEntities(hrefMatch[1]) : '';
+		
+		// Extract attachment name
+		const namePattern = /<span[^>]*class\s*=\s*["']attachment-name["'][^>]*>([^<]+)<\/span>/i;
+		const nameMatch = liContent.match(namePattern);
+		const name = nameMatch ? nameMatch[1].trim() : '';
+		
+		// Extract attachment size
+		const sizePattern = /<span[^>]*class\s*=\s*["']attachment-size["'][^>]*>\s*\(([^)]+)\)\s*<\/span>/i;
+		const sizeMatch = liContent.match(sizePattern);
+		const size = sizeMatch ? sizeMatch[1].trim() : '';
+		
+		// Extract file type from className (first word typically represents the type)
+		const type = className.split(' ')[0] || '';
+		
+		// Extract attachment ID from the li id attribute (remove "attach" prefix if present)
+		const attachmentId = id.replace(/^attach/, '');
+		
+		if (name) { // Only add if we found a name
+			attachments.push({
+				id: attachmentId,
+				name,
+				size,
+				type,
+				url,
+				className
+			});
+		}
+	}
+	
+	return attachments;
+}
+
 /**
  * Extracts email address from HTML span structure in fromto field
  * @param htmlString - The HTML string containing span with title attribute

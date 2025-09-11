@@ -2,6 +2,7 @@ import { useAuthStore } from "@/constants/auth-store"
 import {
 	getComposeFormFromHTML,
 	makeRequest,
+	parseAttachments,
 	parseMailboxData,
 	parseMessageBody
 } from "@/constants/utils"
@@ -17,7 +18,7 @@ export function useGetInbox() {
 		queryFn: async () => {
 			if (!server) throw new Error("Server not set")
 			console.log("Fetching inbox for server:", server)
-		
+
 			const inboxUrl = `https://${server}/?_task=mail&_action=list&_mbox=INBOX&_remote=1&_unlock=loading${Date.now()}&_=${Date.now()}`
 			const res = await makeRequest(inboxUrl, {
 				method: "GET",
@@ -35,7 +36,11 @@ export function useGetInbox() {
 				exec: string
 			}
 			console.log("Inbox fetch response status:", res.status)
-			if (text.exec.includes('this.display_message(\"Your session is invalid or expired.\"')) {
+			if (
+				text.exec.includes(
+					'this.display_message("Your session is invalid or expired."'
+				)
+			) {
 				clearAuth()
 				router.navigate("/auth/login")
 				return
@@ -56,7 +61,7 @@ export function useGetSent() {
 		queryFn: async () => {
 			if (!server) throw new Error("Server not set")
 			console.log("Fetching sent emails for server:", server)
-		
+
 			const sentUrl = `https://${server}/?_task=mail&_action=list&_mbox=Sent&_remote=1&_unlock=loading${Date.now()}&_=${Date.now()}`
 			const res = await makeRequest(sentUrl, {
 				method: "GET",
@@ -73,7 +78,11 @@ export function useGetSent() {
 				exec: string
 			}
 			console.log("Sent fetch response status:", res.status)
-			if (text.exec.includes('this.display_message(\"Your session is invalid or expired.\"')) {
+			if (
+				text.exec.includes(
+					'this.display_message("Your session is invalid or expired."'
+				)
+			) {
 				clearAuth()
 				router.navigate("/auth/login")
 				return
@@ -93,7 +102,7 @@ export function useGetDrafts() {
 		queryFn: async () => {
 			if (!server) throw new Error("Server not set")
 			console.log("Fetching draft emails for server:", server)
-		
+
 			const draftsUrl = `https://${server}/?_task=mail&_action=list&_mbox=Drafts&_remote=1&_unlock=loading${Date.now()}&_=${Date.now()}`
 			const res = await makeRequest(draftsUrl, {
 				method: "GET",
@@ -110,7 +119,11 @@ export function useGetDrafts() {
 				exec: string
 			}
 			console.log("Drafts fetch response status:", res.status)
-			if (text.exec.includes('this.display_message(\"Your session is invalid or expired.\"')) {
+			if (
+				text.exec.includes(
+					'this.display_message("Your session is invalid or expired."'
+				)
+			) {
 				clearAuth()
 				router.navigate("/auth/login")
 				return
@@ -121,9 +134,15 @@ export function useGetDrafts() {
 		staleTime: 0 * 1000
 	})
 }
-export function useGetMessagePreview(id: number,type:"INBOX"|"Sent"|"Drafts") {
+export function useGetMessagePreview(
+	id: number,
+	type: "INBOX" | "Sent" | "Drafts"
+) {
 	const server = useAuthStore((state) => state.server)
-	const final_type = type.toLowerCase() === "inbox" ? "INBOX" : capitalizeFirstLetter(type.toLowerCase())
+	const final_type =
+		type.toLowerCase() === "inbox"
+			? "INBOX"
+			: capitalizeFirstLetter(type.toLowerCase())
 	return useQuery({
 		queryKey: ["preview", server, id],
 		queryFn: async () => {
@@ -138,9 +157,10 @@ export function useGetMessagePreview(id: number,type:"INBOX"|"Sent"|"Drafts") {
 			})
 			const text = await res.text()
 			const content = parseMessageBody(text)
+			const attachments = parseAttachments(text)
 			// console.log(`${final_type} Preview response:`,text.includes("debug"),id, text.slice(0,20),content?.slice(0,40))
 
-			return content
+			return { content: content, attachments: attachments }
 		},
 		staleTime: 0 * 60 * 1000
 	})
@@ -159,7 +179,7 @@ export async function createComposeSessionAsync(server: string) {
 	})
 	const text = await res.text()
 	const data = getComposeFormFromHTML(text)
-	
+
 	// console.log("Compose session response:", text.slice(0,100))
 	return data
 }

@@ -18,7 +18,7 @@ import {
 
 export default function EmailDetailScreen() {
 	const router = useRouter()
-	const { id, email_json,type } = useLocalSearchParams<{
+	const { id, email_json, type } = useLocalSearchParams<{
 		id: string
 		type: "inbox" | "sent" | "drafts"
 		email_json: string
@@ -32,8 +32,8 @@ export default function EmailDetailScreen() {
 		isLoading,
 		isError,
 		error
-	} = useGetMessagePreview(id ? parseInt(id) : 0,type)
-
+	} = useGetMessagePreview(id ? parseInt(id) : 0, type as any)
+	const { attachments, content } = messageBody || {}
 	// Get inbox data to find email details
 
 	// Find the email in the inbox data
@@ -114,7 +114,11 @@ export default function EmailDetailScreen() {
 	return (
 		<ThemedView style={styles.container}>
 			<Stack.Screen options={{ headerShown: false }} />
-			<ScrollView style={styles.content} contentContainerStyle={{paddingBottom:4*10}} showsVerticalScrollIndicator={false}>
+			<ScrollView
+				style={styles.content}
+				contentContainerStyle={{ paddingBottom: 4 * 10 }}
+				showsVerticalScrollIndicator={false}
+			>
 				<Text
 					style={[styles.subject, { color: Colors.text, userSelect: "text" }]}
 				>
@@ -138,7 +142,9 @@ export default function EmailDetailScreen() {
 								{ color: Colors.text, userSelect: "text" }
 							]}
 						>
-							{type === "inbox" ? email.fromto || "Unknown Sender" : user?.username}
+							{type === "inbox"
+								? email.fromto || "Unknown Sender"
+								: user?.username}
 						</Text>
 					</View>
 
@@ -157,7 +163,9 @@ export default function EmailDetailScreen() {
 								{ color: Colors.text, userSelect: "text" }
 							]}
 						>
-							{type === "inbox" ? user?.username || "Unknown Sender" : email.fromto}
+							{type === "inbox"
+								? user?.username || "Unknown Sender"
+								: email.fromto}
 						</Text>
 					</View>
 
@@ -191,9 +199,9 @@ export default function EmailDetailScreen() {
 
 				{/* Email Body */}
 				<View style={styles.bodyContainer}>
-					{messageBody ? (
+					{content ? (
 						<Text style={[styles.body, { userSelect: "text" }]}>
-							{messageBody}
+							{content}
 						</Text>
 					) : (
 						<View style={styles.noContentContainer}>
